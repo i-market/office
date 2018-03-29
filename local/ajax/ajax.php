@@ -1,0 +1,141 @@
+<?define("NO_AGENT_CHECK", true);
+define('STOP_STATISTICS', true);
+require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_before.php");
+
+use \Bitrix\Sender,
+    \Bitrix\Sender\ContactTable,
+    \Bitrix\Catalog\SubscribeTable,
+    \Bitrix\Catalog\Product\SubscribeManager,
+    \Bitrix\Main\Mail\Event,
+    \Bitrix\Sale\Internals\DiscountCouponTable;
+
+global $APPLICATION;
+global $USER;
+$arResult = Array();
+$arEmpty = Array();
+
+$obUser = new CUser;
+$arElement = new CIBlockElement;
+if($USER->isAuthorized()):
+    $userAuth = true;
+    $userId = $USER->getId();
+    $arUser = CUser::getById($userId)->fetch();
+    $userTitle = $USER->GetFullName();
+    $userEmail = $arUser["EMAIL"];
+else:
+    $userAuth = false;
+endif;
+
+$currentCurrency  = CCurrency::GetBaseCurrency();
+$itemId = intVal($_REQUEST["id"]);
+$quantity = intVal($_REQUEST["quantity"]) ? intVal($_REQUEST["quantity"]) : 1;
+$iblockId = CIBlockElement::GetIBlockByID($itemId);
+$basketUserId = CSaleBasket::GetBasketUserID();
+$cartCount = getCartCount();
+$compareCount = intVal(count($_SESSION["COMPARE_LIST"]["ITEMS"]));
+
+
+switch($_REQUEST["mode"]):
+    case "employeeSetPermission":
+        $USER->Update($_REQUEST["employee"], Array("UF_PERMISSION"=>$_REQUEST["permission"]));
+        exitJson(array(
+            "result" => true,
+            "title" => "Права сотрудника",
+            "message" => "Изменения успешно сохранены"
+        ));
+        break;
+    case "employeeAdd":
+        $arFields = Array(
+            "NAME" => $_REQUEST["name"],
+            "LAST_NAME" => $_REQUEST["last_name"],
+            "EMAIL" => $_REQUEST["email"],
+            "LOGIN" => $_REQUEST["email"],
+            "PASSWORD" => randString(8),
+            "PERSONAL_CITY" => $_REQUEST["city"],
+            "PERSONAL_PHONE" => $_REQUEST["phone"],
+            "PERSONAL_ICQ" => $_REQUEST["icq"],
+            "UF_SKYPE" => $_REQUEST["skype"],
+            "UF_DEALER" => $_REQUEST["dealer"],
+            "UF_ACCESS" => BX_DEALER_USER,
+            "UF_PERMISSION" => array(BX_RESTRICT_OFF)
+        );
+        if($userId = $obUser->Add($arFields)):
+            exitJson(Array(
+                "result" => true,
+                "userId" => $userId
+            ));
+        else:
+            exitJson(Array(
+                "result" => false,
+                "message" => $obUser->LAST_ERROR
+            ));
+        endif;
+
+        break;
+
+	case "buy":
+		exitJson(Array(
+			"result"=>Add2BasketByProductID($itemId, $quantity)
+		));
+		break;
+	case "cartUpdate":
+        exitJson(Array(
+        	"result" => true,
+        	"quantity" => $cartCount
+		));
+		break;
+	case "login":
+	    $arResult = $USER->Login($_REQUEST["login"], $_REQUEST["password"], "Y");
+	    exitJson(Array(
+            "result" => !is_array($arResult),
+            "reload" => !is_array($arResult),
+            "message" => is_array($arResult) ? $arResult["MESSAGE"] : "Успешная авторизация"
+	    ));
+	    break;
+    case "userRegister":
+        if($userId = $obUser->Add($_REQUEST)):
+            exitJson(Array(
+                "result" => true,
+                "message" => "Данные анкеты отправлены. В течении 1 недели мы проверим данные и оповестим вас по электронной почте"
+            ));
+        else:
+            exitJson(Array(
+                "result" => true,
+                "message" => $obUser->LAST_ERROR
+            ));
+        endif;
+    break;
+
+    case "commentNews":
+        if(!checkCaptcha())
+            exitJson(Array(
+                "result" => false,
+                "message" => "Вы не прошли проверку reCAPTCHA"
+            ));
+
+        $arFields = Array(
+            "IBLOCK_ID" => IB_NEWS_COMMENTS,
+            "NAME" => $_REQUEST["name"],
+            "PREVIEW_TEXT" => $_REQUEST["message"],
+            "PROPERTY_VALUES" => Array(
+                "USER" => $userId,
+                "ITEM" => $itemId,
+                "EMAIL" => $_REQUEST["email"]
+            )
+        );
+        if($arElement->Add($arFields)):
+            exitJson(Array(
+                "result" => true,
+                "reload" => true,
+                "message" => "Комментарий опубликован"
+            ));
+        else:
+            exitJson(Array(
+                "result" => false,
+                "message" => $arElement->LAST_ERROR
+            ));
+        endif;
+    break;
+
+    default: break;
+endswitch;
