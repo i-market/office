@@ -1,4 +1,44 @@
-<?function MakeNewNavUrl($arAdd) {
+<?
+function getStatus($itemId) {
+    $arItem = CIBlockElement::GetList(
+        array(),
+        array(
+            "IBLOCK_ID"=>IB_OFFERS,
+            "ID"=>$itemId
+        ), false,
+        array("nTopCount"=>"1"),
+        array(
+            "ID",
+            "IBLOCK_ID",
+            "PROPERTY_COUNT_STOCK",
+            "PROPERTY_COUNT_COLLECT",
+            "PROPERTY_COUNT_FREE",
+            "PROPERTY_COUNT_TRANSIT"
+        )
+    )->Fetch();
+
+    if($arItem["PROPERTY_COUNT_STOCK_VALUE"] > 0):
+        $arResult["На складе"] = $arItem["PROPERTY_COUNT_STOCK_VALUE"];
+
+        if($arItem["PROPERTY_COUNT_FREE_VALUE"] > 0):
+            $arResult["Свободно"] = $arItem["PROPERTY_COUNT_FREE_VALUE"];
+        endif;
+    else:
+        if($arItem["PROPERTY_COUNT_FREE_VALUE"] == 0 && $arItem["PROPERTY_COUNT_COLLECT_VALUE"] == 0 && $arItem["PROPERTY_COUNT_TRANSIT_VALUE"] == 0):
+            $arResult["Свободно"] = $arItem["PROPERTY_COUNT_FREE_VALUE"];
+            $arResult["На складе"] = $arItem["PROPERTY_COUNT_STOCK_VALUE"];
+        endif;
+    endif;
+
+    if($arItem["PROPERTY_COUNT_COLLECT_VALUE"] > 0)
+        $arResult["Можно собрать"] = $arItem["PROPERTY_COUNT_COLLECT_VALUE"];
+
+    if($arItem["PROPERTY_COUNT_TRANSIT_VALUE"] > 0)
+        $arResult["В пути"] = $arItem["PROPERTY_COUNT_TRANSIT_VALUE"];
+_c($arResult);
+    return $arResult;
+}
+function MakeNewNavUrl($arAdd) {
    return "?".http_build_query($arAdd, '', '&amp;');
 }
 function cleanArray(array $array, array $symbols = array(''))
@@ -209,6 +249,7 @@ function itemCard($arItem) {
         <?endif;
 
         foreach($arItem["OFFERS"] as $offerId=>$arOffer):
+            $arStatus = getStatus($offerId);
             $arButtons = CIBlock::GetPanelButtons(
                 IB_OFFERS,
                 $offerId,
@@ -318,25 +359,17 @@ function itemCard($arItem) {
 
                 <div class="how_many">
                     <div class="left">
+                    <?$statusCount = 0;
+                    foreach($arStatus as $statusText=>$statusValue):
+                        if(++$statusCount == 3):?>
+                            </div>
+                            <div class="right">
+                        <?endif;?>
                         <p>
-                            <span>На складе</span>
-                            <span><?=intVal($arOffer["PROPERTY_COUNT_STOCK_VALUE"])?></span>
+                            <span><?=$statusText?></span>
+                            <span><?=intVal($statusValue)?></span>
                         </p>
-                        <p>
-                            <span>Свободно</span>
-                            <span><?=intVal($arOffer["PROPERTY_COUNT_FREE_VALUE"])?></span>
-                        </p>
-                    </div>
-                    <div class="right">
-                        <p>
-                            <span>Можно собрать</span>
-                            <span><?=intVal($arOffer["PROPERTY_COUNT_COLLECT_VALUE"])?></span>
-                        </p>
-
-                        <p>
-                            <span>В пути</span>
-                            <span><?=intVal($arOffer["PROPERTY_COUNT_TRANSIT_VALUE"])?></span>
-                        </p>
+                    <?endforeach?>
                     </div>
                 </div>
 
