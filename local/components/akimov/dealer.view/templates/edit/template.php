@@ -332,8 +332,26 @@ _c($_REQUEST);
             <div class="col col_2">
                 <div class="inner-title">
                     <span class="title">юридические лица</span>
-                    <a href="#" class="plus-btn">добавить юридическое лицо</a>
+                    <button class="plus-btn entityAdd">добавить юридическое лицо</button>
                 </div>
+
+                <form class="company-entity-add" data-mode="entityAdd">
+                    <input type="hidden" name="user" value="<?=$arResult["USER_ID"]?>">
+                    <input type="hidden" name="dealer" value="<?=$arResult["DEALER_ID"]?>">
+                    <span class="close"></span>
+                    <div class="item">
+                        <span class="text">Название *</span>
+                        <label>
+                            <input type="text" name="name" required>
+                            <span class="ico"></span>
+                        </label>
+                        <div class="error">Введите название юр. лица</div>
+                    </div>
+                    <div class="message"></div>
+                    <button class="square_button">
+                        <span>Добавить юридическое лицо</span>
+                    </button>
+                </form>
                 <div class="table-legal-entities">
                     <?foreach($arResult["ENTITIES"] as $arEntity):?>
                         <div class="tr">

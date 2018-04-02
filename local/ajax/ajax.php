@@ -36,6 +36,23 @@ $compareCount = intVal(count($_SESSION["COMPARE_LIST"]["ITEMS"]));
 
 
 switch($_REQUEST["mode"]):
+    case "entityAdd":
+        $arFields = Array(
+            "IBLOCK_ID"=>IB_LEGAL,
+            "NAME"=>$_REQUEST["name"],
+            "ACTIVE" => "Y",
+            "PROPERTY_VALUES"=>Array(
+                "DEALER" => $_REQUEST["dealer"]
+            )
+        );
+        $arElement->Add($arFields);
+        exitJson(array(
+            "result" => true,
+            "reload" => true,
+            "title" => "Добавление юридического лица",
+            "message" => "Юридическое лицо успешно добавлено"
+        ));
+        break;
     case "employeeSetPermission":
         $USER->Update($_REQUEST["employee"], Array("UF_PERMISSION"=>$_REQUEST["permission"]));
         exitJson(array(

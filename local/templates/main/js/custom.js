@@ -29,6 +29,25 @@ var ajaxPath = "/local/ajax/ajax.php",
             .on('click', '.employee-data-edit', employeeDataEdit)
             .on('click', '.copy', selectText);
 
+        $('.entityAdd').on('click', function(){
+            $('.company-entity-add').fadeIn(150);
+        });
+        $('.company-entity-add').on('submit', function(){
+            var $form = $(this),
+                jsonData = $form.serialize() + "&mode=" + $form.data('mode');
+
+            $.getJSON(ajaxPath, jsonData, function(jsonResult){
+                $form.fadeOut(150);
+                showModal(jsonResult.title, jsonResult.message);
+                if(jsonResult.reload)
+                    location.reload();
+            });
+
+            return false;
+        });
+        $(".company-entity-add .close").on("click", function () {
+            $(".company-entity-add").fadeOut(150)
+        });
         $('form[name="regform"]').on('submit', function(){
             var $form = $(this),
                 $email = $form.find('input[name="REGISTER[UF_WORK_EMAIL]"]').val();

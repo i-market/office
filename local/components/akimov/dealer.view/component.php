@@ -25,12 +25,22 @@ if($this->StartResultCache(false, $userId))
                 "IBLOCK_ID" => IB_DEALERS,
                 "ID" => $dealerId
             ),
+            "ENTITIES" => Array(
+                "IBLOCK_ID" => IB_LEGAL,
+                "=PROPERTY_DEALER" => $dealerId
+            ),
             "EMPLOYEES" => Array(
                 "UF_DEALER" => $dealerId
             ),
             "MANAGERS" => Array()
         ),
         "SELECTS" => Array(
+            "ENTITIES" => Array(
+                "ID",
+                "IBLOCK_ID",
+                "NAME",
+                "ACTIVE"
+            ),
             "DEALER" => Array(
                 "ID",
                 "IBLOCK_ID",
@@ -96,6 +106,7 @@ if($this->StartResultCache(false, $userId))
         "DEALER" => Array(),
         "MANAGERS" => Array(),
         "EMPLOYEES" => Array(),
+        "ENTITIES" => Array()
     );
     $arResult["DEALER"] = CIBlockElement::GetList(Array(), $arResult["FILTERS"]["DEALER"], false, Array("nTopCount"=>1), $arResult["SELECTS"]["DEALER"])->fetch();
     $arResult["DEALER"]["PICTURE"] = getPhoto($arResult["DEALER"]["PREVIEW_PICTURE"]);
@@ -117,6 +128,11 @@ if($this->StartResultCache(false, $userId))
         $arManager["NAME"] = implode(" ", cleanArray(Array($arManager["NAME"], $arManager["LAST_NAME"])));
         $arManager["ADDRESS"] = implode(", ", cleanArray(Array($arManager["PERSONAL_CITY"], $arManager["PERSONAL_STREET"])));
         $arResult["MANAGERS"][$arManager["ID"]] = $arManager;
+    endwhile;
+
+    $obEntities = CIBlockElement::GetList(Array(), $arResult["FILTERS"]["ENTITIES"], false, false, $arResult["SELECTS"]["ENTITIES"]);
+    while($arEntity = $obEntities->fetch()):
+        $arResult["ENTITIES"][$arEntity["ID"]] = $arEntity;
     endwhile;
 
 	$this->SetResultCacheKeys(array(
