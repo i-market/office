@@ -332,38 +332,77 @@ _c($_REQUEST);
             <div class="col col_2">
                 <div class="inner-title">
                     <span class="title">юридические лица</span>
-                    <button class="plus-btn entityAdd">добавить юридическое лицо</button>
+                    <button class="plus-btn add-ur-form">добавить юридическое лицо</button>
                 </div>
 
-                <form class="company-entity-add" data-mode="entityAdd">
-                    <input type="hidden" name="user" value="<?=$arResult["USER_ID"]?>">
-                    <input type="hidden" name="dealer" value="<?=$arResult["DEALER_ID"]?>">
+                <form class="ur-form" data-mode="entityAdd">
+                <input type="hidden" name="user" value="<?=$arResult["USER_ID"]?>">
+                <input type="hidden" name="dealer" value="<?=$arResult["DEALER_ID"]?>">
                     <span class="close"></span>
-                    <div class="item">
-                        <span class="text">Название *</span>
-                        <label>
-                            <input type="text" name="name" required>
-                            <span class="ico"></span>
-                        </label>
-                        <div class="error">Введите название юр. лица</div>
-                    </div>
-                    <div class="message"></div>
-                    <button class="square_button">
-                        <span>Добавить юридическое лицо</span>
+                    <label class="long-text">
+                        <span class="text">Название организации*</span>
+                        <input type="text" name="name" required>
+                    </label>
+                    <label class="half">
+                        <span class="text">индекс*</span>
+                        <input type="text" name="zip" required>
+                    </label>
+                    <label class="half">
+                        <span class="text">Почтовый код*</span>
+                        <input type="text" name="code" required>
+                    </label>
+                    <label class="small">
+                        <span class="text">город*</span>
+                        <input type="text" name="city" required>
+                    </label>
+                    <label>
+                        <span class="text">адрес*</span>
+                        <input type="text" name="address" required>
+                    </label>
+                    <label>
+                        <span class="text">юр.адрес*</span>
+                        <input type="text" name="legal-address" required>
+                    </label>
+                    <label>
+                        <span class="text">ИНН*</span>
+                        <input type="text" name="inn" required>
+                    </label>
+                    <label>
+                        <span class="text">КПП*</span>
+                        <input type="text" name="kpp" required>
+                    </label>
+                    <label>
+                        <span class="text">ОКПО*</span>
+                        <input type="text" name="okpo" required>
+                    </label>
+                    <label class="half">
+                        <span class="text">телефон*</span>
+                        <input type="text" name="phone" required>
+                    </label>
+                    <label class="half">
+                        <span class="text">e-mail*</span>
+                        <input type="text" name="email" required>
+                    </label>
+                    <label class="small">
+                        <span class="text">контакт</span>
+                        <input type="text" name="contact">
+                    </label>
+                    <button type="submit" class="square_button">
+                        <span>добавить</span>
                     </button>
                 </form>
-                <div class="table-legal-entities">
+
+                <form class="table-legal-entities">
                     <?foreach($arResult["ENTITIES"] as $arEntity):?>
                         <div class="tr">
                             <div class="td"><?=$arEntity["NAME"]?></div>
-                            <div class="td"><?=$arEntity["ACTIVE"] == "Y" ? "активно" : "не активно"?></div>
                             <div class="td">
-                                <input type="checkbox" hidden="hidden" class="radio-check-input" id="111" checked>
-                                <label for="111" class="radio-check">Сделать <?=$arEntity["ACTIVE"] == "Y" ? "не активным" : "активным"?></label>
+                                <input type="checkbox" name="active" value="<?=$arEntity["ID"]?>" hidden="hidden" class="ios-toggle" id="entity_<?=$arEntity["ID"]?>"<?if($arEntity["ACTIVE"] == "Y"):?> checked<?endif?>>
+                                <label for="entity_<?=$arEntity["ID"]?>" class="checkbox-label" data-off="Не активно" data-on="Активно"></label>
                             </div>
                         </div>
                     <?endforeach?>
-                </div>
+                </form>
                 <span class="table-legal-entities-btn"></span>
             </div>
             <div class="col col_2">
@@ -392,10 +431,10 @@ _c($_REQUEST);
     </div>
 </section>
 <section class="unsubscribe">
-    <div class="wrap">
+    <form class="wrap">
         <p class="title">рассылка</p>
-        <input type="checkbox" hidden="hidden" class="radio-check-input" id="01" checked>
-        <label for="01" class="radio-check">Я хочу отписаться от рассылки</label>
+        <input type="checkbox" name="subscribe" hidden="hidden" class="ios-toggle" id="subscribe-off"<?if($arResult["USER"]["UF_SUBSCRIBE"]):?> checked<?endif?>>
+        <label for="subscribe-off" class="checkbox-label" data-off="Не подписан" data-on="Подписан"></label>
     </div>
 </section>
 <section class="pages-bottom-square-link">

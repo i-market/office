@@ -12,6 +12,20 @@ var ajaxPath = "/local/ajax/ajax.php",
         // Off events
         $(".company-employees-add-btn").off("click");
 
+        $document
+            .on('change', '.table-legal-entities input[type=checkbox]', function(){
+                $.getJSON(ajaxPath, {
+                    mode:  'changeActive',
+                    value: $(this).prop('checked'),
+                    id: $(this).val()
+                });
+            })
+            .on('change', '.unsubscribe form input[type=checkbox]', function(){
+                $.getJSON(ajaxPath, {
+                    mode:  'unsubscribe',
+                    value: $(this).prop('checked')
+                });
+            });
         $document.on('click', '.change-configuration', function(){
             var $this = $(this),
                 offerId = $this.data('offer'),
@@ -29,19 +43,25 @@ var ajaxPath = "/local/ajax/ajax.php",
             .on('click', '.employee-data-edit', employeeDataEdit)
             .on('click', '.copy', selectText);
 
-        $('.entityAdd').on('click', function(){
-            $('.company-entity-add').fadeIn(150);
-        });
-        $('.company-entity-add').on('submit', function(){
-            var $form = $(this),
-                jsonData = $form.serialize() + "&mode=" + $form.data('mode');
+        $('.ur-form').on('submit', function(){
+            var $this = $(this),
+                valid = true,
+                $required = $this.find('[required]'),
+                jsonData = $this.serialize() + "&mode=" + $this.data('mode');
 
-            $.getJSON(ajaxPath, jsonData, function(jsonResult){
-                $form.fadeOut(150);
-                showModal(jsonResult.title, jsonResult.message);
-                if(jsonResult.reload)
-                    location.reload();
+            $required.each(function(){
+                if(!$(this).val()) {
+                    valid = false;
+                    $(this).parent('label').addClass('error');
+                }
             });
+            if(valid)
+                $.getJSON(ajaxPath, jsonData, function(jsonResult){
+                    $this.fadeOut(150);
+                    showModal(jsonResult.title, jsonResult.message);
+                    if(jsonResult.reload)
+                        location.reload();
+                });
 
             return false;
         });

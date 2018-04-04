@@ -36,13 +36,43 @@ $compareCount = intVal(count($_SESSION["COMPARE_LIST"]["ITEMS"]));
 
 
 switch($_REQUEST["mode"]):
+    case "unsubscribe":
+        $arFields = Array("UF_SUBSCRIBE"=>$_REQUEST["value"] != "true" ? "0" : "1");
+        exitJson(array(
+            "id"=>$userId,
+            "fields"=>$arFields,
+            "result"=>$USER->Update($userId, $arFields)
+        ));
+        break;
+
+    case "changeActive":
+        $arFields = Array("ACTIVE"=>$_REQUEST["value"] != "true" ? "N" : "Y");
+        exitJson(array(
+            "id"=>$_REQUEST["id"],
+            "fields"=>$arFields,
+            "result"=>$arElement->Update($_REQUEST["id"], $arFields)
+        ));
+        break;
+
     case "entityAdd":
         $arFields = Array(
             "IBLOCK_ID"=>IB_LEGAL,
             "NAME"=>$_REQUEST["name"],
             "ACTIVE" => "Y",
             "PROPERTY_VALUES"=>Array(
-                "DEALER" => $_REQUEST["dealer"]
+                "DEALER" => $_REQUEST["dealer"],
+                "COMPANY"=>$_REQUEST["name"],
+                "CODE"=>$_REQUEST["code"],
+                "CITY" => $_REQUEST["city"],
+                "ZIP" => $_REQUEST["zip"],
+                "ADDRESS" => $_REQUEST["address"],
+                "LEGAL_ADDRESS" => $_REQUEST["legal-address"],
+                "INN" => $_REQUEST["inn"],
+                "KPP" => $_REQUEST["kpp"],
+                "OKPO" => $_REQUEST["okpo"],
+                "PHONE" => $_REQUEST["phone"],
+                "CONTACT" => $_REQUEST["contact"],
+                "EMAIL" => $_REQUEST["email"]
             )
         );
         $arElement->Add($arFields);
